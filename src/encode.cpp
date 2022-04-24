@@ -21,14 +21,22 @@ namespace bmpxx
     auto dib_header = createEncodeDibHeader(desc);
 
     std::vector<uint8_t> output(sizeof(internal::bmp_header) + dib_header.header_size + dib_header.data_size);
-    uint32_t output_pos = (uint32_t)output.size() - dib_header.meta.padded_row_width;
-    uint32_t input_pos = 0;
+    uint32_t output_pos = sizeof(internal::bmp_header) + dib_header.header_size;
+    uint32_t input_pos = (uint32_t)input.size() - input_row_length;
 
-    for (int32_t y = 0; y < dib_header.height; y++)
+    for (int32_t y = dib_header.height - 1; y >= 0; y--)
     {
-      std::memcpy(&output[output_pos], &input[input_pos], input_row_length);
-      output_pos -= dib_header.meta.padded_row_width;
-      input_pos += input_row_length;
+      for (int32_t x = 0; x < (int32_t)input_row_length; x += desc.channels)
+      {
+        output[output_pos + x + 2] = input[input_pos + x + 0];
+        output[output_pos + x + 1] = input[input_pos + x + 1];
+        output[output_pos + x + 0] = input[input_pos + x + 2];
+
+        if (desc.channels == 4)
+          output[output_pos + x + 3] = input[input_pos + x + 3];
+      }
+      output_pos += dib_header.meta.padded_row_width;
+      input_pos -= input_row_length;
     }
 
     auto bmp_header = internal::bmp_header();
