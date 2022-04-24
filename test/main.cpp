@@ -33,7 +33,7 @@ int main(int ac, char **av)
   // if input ends with .bmp
   if (input_filename.size() > 4 && input_filename.substr(input_filename.size() - 4) == ".bmp")
   {
-    auto result = bmpxx::decode(inputImage);
+    auto result = bmpxx::bmp::decode(inputImage);
 
     std::vector<uint8_t> outputImage = result.first;
     bmpxx::bmp_desc description = result.second;
@@ -58,7 +58,7 @@ int main(int ac, char **av)
 
     bmpxx::bmp_desc description(std::stoi(av[3]), std::stoi(av[4]), (uint8_t)std::stoi(av[5]));
 
-    std::vector<uint8_t> outputImage = bmpxx::encode(inputImage, description);
+    std::vector<uint8_t> outputImage = bmpxx::bmp::encode(inputImage, description);
 
     std::cout << "Successfully encoded " << input_filename << " to " << output_filename << std::endl;
 

@@ -8,7 +8,7 @@
 
 namespace bmpxx
 {
-  std::vector<uint8_t> encode(std::vector<uint8_t> input, bmp_desc desc)
+  std::vector<uint8_t> bmp::encode(std::vector<uint8_t> input, bmp_desc desc)
   {
     if (desc.channels != 3 && desc.channels != 4)
       throw std::runtime_error("Only 3 and 4 channels are supported");
@@ -20,8 +20,8 @@ namespace bmpxx
 
     auto dib_header = createEncodeDibHeader(desc);
 
-    std::vector<uint8_t> output(sizeof(internal::bmp_header) + dib_header.header_size + dib_header.data_size);
-    uint32_t output_pos = sizeof(internal::bmp_header) + dib_header.header_size;
+    std::vector<uint8_t> output(sizeof(bmp_header) + dib_header.header_size + dib_header.data_size);
+    uint32_t output_pos = sizeof(bmp_header) + dib_header.header_size;
     uint32_t input_pos = (uint32_t)input.size() - input_row_length;
 
     for (int32_t y = dib_header.height - 1; y >= 0; y--)
@@ -39,22 +39,22 @@ namespace bmpxx
       input_pos -= input_row_length;
     }
 
-    auto bmp_header = internal::bmp_header();
-    bmp_header.file_size = (uint32_t)output.size();
-    bmp_header.data_offset = sizeof(internal::bmp_header) + dib_header.header_size;
+    auto bmp_head = bmp_header();
+    bmp_head.file_size = (uint32_t)output.size();
+    bmp_head.data_offset = sizeof(bmp_header) + dib_header.header_size;
 
-    std::memcpy(output.data(), &bmp_header, sizeof(internal::bmp_header));
-    std::memcpy(output.data() + sizeof(internal::bmp_header), &dib_header, dib_header.header_size);
+    std::memcpy(output.data(), &bmp_head, sizeof(bmp_header));
+    std::memcpy(output.data() + sizeof(bmp_header), &dib_header, dib_header.header_size);
 
     return output;
   }
 
-  internal::dib_encode_header createEncodeDibHeader(bmp_desc desc)
+  bmp::dib_encode_header bmp::createEncodeDibHeader(bmp_desc desc)
   {
     if (desc.channels != 3 && desc.channels != 4)
       throw std::runtime_error("Only 3 and 4 channels are supported");
 
-    auto dib_header = internal::dib_encode_header();
+    auto dib_header = dib_encode_header();
 
     dib_header.width = desc.width;
     dib_header.height = desc.height;
@@ -62,7 +62,7 @@ namespace bmpxx
     if (desc.channels == 4)
     {
       dib_header.bits_per_pixel = 32;
-      dib_header.compression = internal::BI_BITFIELDS;
+      dib_header.compression = BI_BITFIELDS;
       dib_header.masks_rgba.red_mask = 0x00ff0000;
       dib_header.masks_rgba.green_mask = 0x0000ff00;
       dib_header.masks_rgba.blue_mask = 0x000000ff;
@@ -71,7 +71,7 @@ namespace bmpxx
     else
     {
       dib_header.bits_per_pixel = 24;
-      dib_header.compression = internal::BI_RGB;
+      dib_header.compression = BI_RGB;
     }
 
     dib_header.meta = createDIBHeaderMeta(&dib_header);
@@ -80,19 +80,4 @@ namespace bmpxx
     return dib_header;
   }
 
-  internal::dib_header_meta createDIBHeaderMeta(internal::dib_encode_header *dib_header)
-  {
-    auto dib_header_meta = internal::dib_header_meta();
-
-    // Padding rows
-    const uint32_t row_width_bits = dib_header->width * dib_header->bits_per_pixel;
-    const uint32_t row_padding_bits = (32 - (row_width_bits % 32)) % 32;
-    const uint32_t padded_row_width_bytes = (row_width_bits + row_padding_bits) / 8;
-
-    dib_header_meta.padded_row_width = padded_row_width_bytes;
-    // Alpha
-    dib_header_meta.has_alpha_channel = dib_header->masks_rgba.alpha_mask != 0;
-
-    return dib_header_meta;
-  }
 }
