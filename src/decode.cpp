@@ -1,16 +1,10 @@
 #include "bmpxx.hpp"
 
 #include <cstdint>
-#include <cstddef>
 #include <cstring>
 #include <vector>
-#include <type_traits>
-#include <memory>
 #include <stdexcept>
 #include <bit>
-#include <utility>
-#include <iostream>
-#include <iomanip>
 
 namespace bmpxx
 {

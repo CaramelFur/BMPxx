@@ -32,7 +32,12 @@ int main(int ac, char **av)
   auto result = bmpxx::decode(inputImage);
 
   std::vector<uint8_t> outputImage = result.first;
-  //bmpxx::desc description = result.second;
+  bmpxx::bmp_desc description = result.second;
+
+  // Print first 4 bytes of outputImage
+  printf("%02x %02x %02x %02x\n", outputImage[0], outputImage[1], outputImage[2], outputImage[3]);
+
+  auto result2 = bmpxx::encode(outputImage, description);
 
   // // Print outputImage bytes
   // for (int i = 0; i < outputImage.size(); i++)
@@ -45,8 +50,8 @@ int main(int ac, char **av)
   // std::cout << std::endl;
 
   // Save outputimage
-  std::ofstream outfile("output.rgb", std::ios::binary);
-  outfile.write(reinterpret_cast<char *>(outputImage.data()), outputImage.size());
+  std::ofstream outfile("test.bmp", std::ios::binary);
+  outfile.write(reinterpret_cast<char *>(result2.data()), result2.size());
   outfile.close();
 
   return 0;

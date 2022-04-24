@@ -1,5 +1,4 @@
 #include <cstdint>
-#include <utility>
 #include <vector>
 
 #pragma once
@@ -106,7 +105,7 @@ namespace bmpxx
       uint32_t header_size = 0;
       std::int32_t width = 0;
       std::int32_t height = 0;
-      uint16_t planes = 0;
+      uint16_t planes = 1;
       uint16_t bits_per_pixel = 0;
       dib_compression compression = BI_RGB;
       uint32_t data_size = 0;
@@ -166,8 +165,8 @@ namespace bmpxx
 
   struct bmp_desc
   {
-    uint32_t width;
-    uint32_t height;
+    int32_t width;
+    int32_t height;
     uint8_t channels;
 
     bmp_desc(uint32_t width, uint32_t height, uint8_t channels)
@@ -175,6 +174,8 @@ namespace bmpxx
     {
     }
   };
+
+  // Decode
 
   std::pair<std::vector<uint8_t>, bmp_desc> decode(std::vector<uint8_t> inputImage);
   std::pair<std::vector<uint8_t>, bmp_desc> decodePalette(
@@ -194,4 +195,8 @@ namespace bmpxx
   void fixDIBHeaderDataSize(internal::dib_header *dib_header);
   void fixDIBHeaderCompression(std::vector<uint8_t> inputImage, internal::dib_header *dib_header);
   void fixDIBHeaderMasks(internal::dib_header *dib_header);
+
+  // Encode
+
+  std::vector<uint8_t> encode(std::vector<uint8_t> input, bmp_desc desc);
 }
