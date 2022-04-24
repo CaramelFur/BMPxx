@@ -8,7 +8,7 @@
 
 namespace bmpxx
 {
-  std::vector<uint8_t> bmp::encode(std::vector<uint8_t> input, bmp_desc desc)
+  std::vector<uint8_t> bmp::encode(std::vector<uint8_t> input, BmpDesc desc)
   {
     if (desc.channels != 3 && desc.channels != 4)
       throw std::runtime_error("Only 3 and 4 channels are supported");
@@ -20,8 +20,8 @@ namespace bmpxx
 
     auto dib_header = createEncodeDibHeader(desc);
 
-    std::vector<uint8_t> output(sizeof(bmp_header) + dib_header.header_size + dib_header.data_size);
-    uint32_t output_pos = sizeof(bmp_header) + dib_header.header_size;
+    std::vector<uint8_t> output(sizeof(BmpHeader) + dib_header.header_size + dib_header.data_size);
+    uint32_t output_pos = sizeof(BmpHeader) + dib_header.header_size;
     uint32_t input_pos = (uint32_t)input.size() - input_row_length;
 
     for (int32_t y = dib_header.height - 1; y >= 0; y--)
@@ -39,22 +39,22 @@ namespace bmpxx
       input_pos -= input_row_length;
     }
 
-    auto bmp_head = bmp_header();
-    bmp_head.file_size = (uint32_t)output.size();
-    bmp_head.data_offset = sizeof(bmp_header) + dib_header.header_size;
+    auto bmp_header = BmpHeader();
+    bmp_header.file_size = (uint32_t)output.size();
+    bmp_header.data_offset = sizeof(BmpHeader) + dib_header.header_size;
 
-    std::memcpy(output.data(), &bmp_head, sizeof(bmp_header));
-    std::memcpy(output.data() + sizeof(bmp_header), &dib_header, dib_header.header_size);
+    std::memcpy(output.data(), &bmp_header, sizeof(BmpHeader));
+    std::memcpy(output.data() + sizeof(BmpHeader), &dib_header, dib_header.header_size);
 
     return output;
   }
 
-  bmp::dib_encode_header bmp::createEncodeDibHeader(bmp_desc desc)
+  bmp::DibEncodeHeader bmp::createEncodeDibHeader(BmpDesc desc)
   {
     if (desc.channels != 3 && desc.channels != 4)
       throw std::runtime_error("Only 3 and 4 channels are supported");
 
-    auto dib_header = dib_encode_header();
+    auto dib_header = DibEncodeHeader();
 
     dib_header.width = desc.width;
     dib_header.height = desc.height;

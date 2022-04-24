@@ -38,11 +38,11 @@ namespace bmpxx {
 
 // Decodes a bmp file into either an RGB or RGBA pixel array
 // Returns the width, height and channel count of the image
-std::pair<std::vector<uint8_t>, bmp_desc> bmp::decode(std::vector<uint8_t> inputImage);
+std::pair<std::vector<uint8_t>, BmpDesc> bmp::decode(std::vector<uint8_t> inputImage);
 
 // Encodes an RGB or RGBA pixel array into a bmp file
 // Returns the encoded bmp file
-std::vector<uint8_t> bmp::encode(std::vector<uint8_t> input, bmp_desc desc);
+std::vector<uint8_t> bmp::encode(std::vector<uint8_t> input, BmpDesc desc);
 
 }
 ```
@@ -50,7 +50,7 @@ std::vector<uint8_t> bmp::encode(std::vector<uint8_t> input, bmp_desc desc);
 ### Structs
 
 ```cpp
-struct bmp_desc
+struct BmpDesc
 {
   int32_t width;
   int32_t height;

@@ -5,13 +5,13 @@
 
 namespace bmpxx
 {
-  struct bmp_desc
+  struct BmpDesc
   {
     int32_t width;
     int32_t height;
     uint8_t channels;
 
-    bmp_desc(uint32_t width, uint32_t height, uint8_t channels)
+    BmpDesc(uint32_t width, uint32_t height, uint8_t channels)
         : width(width), height(height), channels(channels) {}
   };
 
@@ -22,7 +22,7 @@ namespace bmpxx
     // Enums
     // ============================================================
 
-    enum color_space
+    enum ColorSpace
     {
       CALIBRATED_RGB = 0x00000000,
       S_RGB = 0x73524742,
@@ -31,7 +31,7 @@ namespace bmpxx
       PROFILE_EMBEDDED = 0x4D424544
     };
 
-    enum gamut_mapping_intent
+    enum GamutMappingIntent
     {
       GM_ABS_COLORIMETRIC = 0x00000008,
       GM_BUSINESS = 0x00000001,
@@ -39,7 +39,7 @@ namespace bmpxx
       GM_IMAGES = 0x00000004
     };
 
-    enum dib_compression
+    enum DibCompression
     {
       BI_RGB = 0,
       BI_RLE8 = 1,
@@ -57,7 +57,7 @@ namespace bmpxx
     // Structs
     // ============================================================
 
-    struct decoded_rgba_masks
+    struct DecodedRgbaMasks
     {
       uint8_t red_mask = 0;
       uint8_t green_mask = 0;
@@ -75,7 +75,7 @@ namespace bmpxx
       float alpha_scale = 0.0f;
     };
 
-    struct RGBAColor
+    struct RgbaColor
     {
       uint8_t red;
       uint8_t green;
@@ -83,7 +83,7 @@ namespace bmpxx
       uint8_t alpha;
     };
 
-    struct dib_header_meta
+    struct DibHeaderMeta
     {
       uint32_t padded_row_width = 0;
       uint8_t has_alpha_channel = 0;
@@ -93,21 +93,21 @@ namespace bmpxx
     // Packed structs
     // ============================================================
 
-    struct __attribute__((packed)) ciexyz
+    struct __attribute__((packed)) Ciexyz
     {
       float x = 0.0f;
       float y = 0.0f;
       float z = 0.0f;
     };
 
-    struct __attribute__((packed)) ciexyx_triple
+    struct __attribute__((packed)) CiexyxTriple
     {
-      ciexyz red = ciexyz();
-      ciexyz green = ciexyz();
-      ciexyz blue = ciexyz();
+      Ciexyz red = Ciexyz();
+      Ciexyz green = Ciexyz();
+      Ciexyz blue = Ciexyz();
     };
 
-    struct __attribute__((packed)) bmp_header
+    struct __attribute__((packed)) BmpHeader
     {
       char identifier[2] = {'B', 'M'};
       uint32_t file_size = 0;
@@ -116,19 +116,19 @@ namespace bmpxx
       uint32_t data_offset = 0;
     };
 
-    struct __attribute__((packed)) rgb_masks
+    struct __attribute__((packed)) RgbMasks
     {
       uint32_t red_mask = 0;
       uint32_t green_mask = 0;
       uint32_t blue_mask = 0;
     };
 
-    struct __attribute__((packed)) rgba_masks : rgb_masks
+    struct __attribute__((packed)) RgbaMasks : RgbMasks
     {
       uint32_t alpha_mask = 0;
     };
 
-    struct __attribute__((packed)) dib_12_header
+    struct __attribute__((packed)) Dib12Header
     {
       uint32_t header_size = 0;
       uint16_t width = 0;
@@ -137,14 +137,14 @@ namespace bmpxx
       uint16_t bits_per_pixel = 0;
     };
 
-    struct __attribute__((packed)) dib_40_header
+    struct __attribute__((packed)) Dib40Header
     {
       uint32_t header_size = 0;
       std::int32_t width = 0;
       std::int32_t height = 0;
       uint16_t planes = 1;
       uint16_t bits_per_pixel = 0;
-      dib_compression compression = BI_RGB;
+      DibCompression compression = BI_RGB;
       uint32_t data_size = 0;
       uint32_t horizontal_resolution = 96;
       uint32_t vertical_resolution = 96;
@@ -152,45 +152,45 @@ namespace bmpxx
       uint32_t important_colors = 0;
     };
 
-    struct __attribute__((packed)) dib_52_header : dib_40_header
+    struct __attribute__((packed)) Dib52Header : Dib40Header
     {
-      rgb_masks masks_rgb = rgb_masks();
+      RgbMasks masks_rgb = RgbMasks();
     };
 
-    struct __attribute__((packed)) dib_56_header : dib_40_header
+    struct __attribute__((packed)) Dib56Header : Dib40Header
     {
-      rgba_masks masks_rgba = rgba_masks();
+      RgbaMasks masks_rgba = RgbaMasks();
     };
 
-    struct __attribute__((packed)) dib_108_header : dib_56_header
+    struct __attribute__((packed)) Dib108Header : Dib56Header
     {
-      color_space color_space_type = S_RGB;
+      ColorSpace color_space_type = S_RGB;
 
-      ciexyx_triple endpoints = ciexyx_triple();
+      CiexyxTriple endpoints = CiexyxTriple();
 
       uint32_t gamma_red = 0;
       uint32_t gamma_green = 0;
       uint32_t gamma_blue = 0;
     };
 
-    struct __attribute__((packed)) dib_124_header : dib_108_header
+    struct __attribute__((packed)) Dib124Header : Dib108Header
     {
-      gamut_mapping_intent intent = GM_GRAPHICS;
+      GamutMappingIntent intent = GM_GRAPHICS;
       uint32_t profile_data = 0;
       uint32_t profile_size = 0;
       uint32_t reserved = 0;
     };
 
-    struct __attribute__((packed)) dib_decode_header : dib_124_header
+    struct __attribute__((packed)) DibDecodeHeader : Dib124Header
     {
-      dib_header_meta meta = dib_header_meta();
+      DibHeaderMeta meta = DibHeaderMeta();
     };
 
-    struct __attribute__((packed)) dib_encode_header : dib_56_header
+    struct __attribute__((packed)) DibEncodeHeader : Dib56Header
     {
-      dib_header_meta meta = dib_header_meta();
+      DibHeaderMeta meta = DibHeaderMeta();
 
-      dib_encode_header()
+      DibEncodeHeader()
       {
         header_size = 56;
       }
@@ -202,35 +202,35 @@ namespace bmpxx
 
     // Decode
 
-    static std::pair<std::vector<uint8_t>, bmp_desc> decodePalette(
+    static std::pair<std::vector<uint8_t>, BmpDesc> decodePalette(
         std::vector<uint8_t> inputImage,
-        bmp_header *bmp_header,
-        dib_decode_header *dib_header);
-    static std::pair<std::vector<uint8_t>, bmp_desc> decodeNormal(
+        BmpHeader *bmp_header,
+        DibDecodeHeader *dib_header);
+    static std::pair<std::vector<uint8_t>, BmpDesc> decodeNormal(
         std::vector<uint8_t> inputImage,
-        bmp_header *bmp_header,
-        dib_decode_header *dib_header);
-    static decoded_rgba_masks decodeMasks(dib_decode_header *dib_header);
+        BmpHeader *bmp_header,
+        DibDecodeHeader *dib_header);
+    static DecodedRgbaMasks decodeMasks(DibDecodeHeader *dib_header);
 
-    static bmp_header readBMPHeader(std::vector<uint8_t> inputImage);
-    static uint32_t readDIBHeaderSize(std::vector<uint8_t> inputImage, bmp_header *bmp_header);
-    static dib_decode_header readDIBHeader(std::vector<uint8_t> inputImage, bmp_header *bmp_header);
+    static BmpHeader readBMPHeader(std::vector<uint8_t> inputImage);
+    static uint32_t readDIBHeaderSize(std::vector<uint8_t> inputImage, BmpHeader *bmp_header);
+    static DibDecodeHeader readDIBHeader(std::vector<uint8_t> inputImage, BmpHeader *bmp_header);
 
-    static void fixDIBHeaderDataSize(dib_decode_header *dib_header);
-    static void fixDIBHeaderCompression(std::vector<uint8_t> inputImage, dib_decode_header *dib_header);
-    static void fixDIBHeaderMasks(dib_decode_header *dib_header);
+    static void fixDIBHeaderDataSize(DibDecodeHeader *dib_header);
+    static void fixDIBHeaderCompression(std::vector<uint8_t> inputImage, DibDecodeHeader *dib_header);
+    static void fixDIBHeaderMasks(DibDecodeHeader *dib_header);
 
     // Encode
 
-    static dib_encode_header createEncodeDibHeader(bmp_desc desc);
+    static DibEncodeHeader createEncodeDibHeader(BmpDesc desc);
 
     // Shared
 
-    static dib_header_meta createDIBHeaderMeta(dib_56_header *dib_header);
+    static DibHeaderMeta createDIBHeaderMeta(Dib56Header *dib_header);
 
   public:
-    static std::pair<std::vector<uint8_t>, bmp_desc> decode(std::vector<uint8_t> inputImage);
-    static std::vector<uint8_t> encode(std::vector<uint8_t> input, bmp_desc desc);
+    static std::pair<std::vector<uint8_t>, BmpDesc> decode(std::vector<uint8_t> inputImage);
+    static std::vector<uint8_t> encode(std::vector<uint8_t> input, BmpDesc desc);
   };
 
   // Decode

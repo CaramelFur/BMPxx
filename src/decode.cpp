@@ -8,7 +8,7 @@
 
 namespace bmpxx
 {
-  std::pair<std::vector<uint8_t>, bmp_desc> bmp::decode(std::vector<uint8_t> inputImage)
+  std::pair<std::vector<uint8_t>, BmpDesc> bmp::decode(std::vector<uint8_t> inputImage)
   {
     auto bmp_header = readBMPHeader(inputImage);
 
@@ -40,27 +40,27 @@ namespace bmpxx
     }
   }
 
-  std::pair<std::vector<uint8_t>, bmp_desc> bmp::decodePalette(
+  std::pair<std::vector<uint8_t>, BmpDesc> bmp::decodePalette(
       std::vector<uint8_t> inputImage,
-      bmp_header *bmp_header,
-      dib_decode_header *dib_header)
+      BmpHeader *bmp_header,
+      DibDecodeHeader *dib_header)
   {
     if (dib_header->colors_used == 0 || dib_header->colors_used > 256)
       throw std::runtime_error("input image colors used is invalid");
 
     // Check if the data_offset is actually a valid position in the file
-    if (bmp_header->data_offset < sizeof(bmp_header) + dib_header->header_size + dib_header->colors_used * 4)
+    if (bmp_header->data_offset < sizeof(BmpHeader) + dib_header->header_size + dib_header->colors_used * 4)
       throw std::runtime_error("input image data offset is too small");
 
     // Extract pointer to palette
-    const uint32_t *palette = reinterpret_cast<const uint32_t *>(inputImage.data() + sizeof(bmp_header) + dib_header->header_size);
+    const uint32_t *palette = reinterpret_cast<const uint32_t *>(inputImage.data() + sizeof(BmpHeader) + dib_header->header_size);
 
     const uint32_t pixels_per_byte = (8 / dib_header->bits_per_pixel);
     const uint32_t pixels_mask = ((1 << dib_header->bits_per_pixel) - 1);
 
     // A palette image is always 3 channel RGB
     uint32_t decoded_data_pos = 0;
-    auto description = bmp_desc(dib_header->width, dib_header->height, 3);
+    auto description = BmpDesc(dib_header->width, dib_header->height, 3);
     std::vector<uint8_t> decoded_data(description.width * description.height * description.channels);
 
     for (int32_t y = dib_header->height - 1; y >= 0; y--)
@@ -75,7 +75,7 @@ namespace bmpxx
 
         const uint32_t palette_index = (row_ptr[target_byte] >> target_shift) & pixels_mask;
 
-        const RGBAColor *color = reinterpret_cast<const RGBAColor *>(palette + palette_index);
+        const RgbaColor *color = reinterpret_cast<const RgbaColor *>(palette + palette_index);
 
         decoded_data[decoded_data_pos++] = color->red;
         decoded_data[decoded_data_pos++] = color->green;
@@ -86,13 +86,13 @@ namespace bmpxx
     return std::make_pair(decoded_data, description);
   }
 
-  std::pair<std::vector<uint8_t>, bmp_desc> bmp::decodeNormal(
+  std::pair<std::vector<uint8_t>, BmpDesc> bmp::decodeNormal(
       std::vector<uint8_t> inputImage,
-      bmp_header *bmp_header,
-      dib_decode_header *dib_header)
+      BmpHeader *bmp_header,
+      DibDecodeHeader *dib_header)
   {
     uint32_t decoded_data_pos = 0;
-    auto description = bmp_desc(
+    auto description = BmpDesc(
         dib_header->width,
         dib_header->height,
         dib_header->meta.has_alpha_channel ? 4 : 3);
@@ -129,9 +129,9 @@ namespace bmpxx
     return std::make_pair(decoded_data, description);
   }
 
-  bmp::decoded_rgba_masks bmp::decodeMasks(dib_decode_header *dib_header)
+  bmp::DecodedRgbaMasks bmp::decodeMasks(DibDecodeHeader *dib_header)
   {
-    auto masks = decoded_rgba_masks();
+    auto masks = DecodedRgbaMasks();
 
     int red_rzero = std::countr_zero(dib_header->masks_rgba.red_mask) % 32;
     int green_rzero = std::countr_zero(dib_header->masks_rgba.green_mask) % 32;
@@ -166,14 +166,14 @@ namespace bmpxx
     return masks;
   }
 
-  bmp::bmp_header bmp::readBMPHeader(std::vector<uint8_t> inputImage)
+  bmp::BmpHeader bmp::readBMPHeader(std::vector<uint8_t> inputImage)
   {
     // Check if the input image is large enough to contain the main header.
-    if (inputImage.size() <= sizeof(bmp_header) + sizeof(dib_12_header))
+    if (inputImage.size() <= sizeof(BmpHeader) + sizeof(Dib12Header))
       throw std::runtime_error("input image is too small");
 
-    auto header = bmp_header();
-    std::memcpy(&header, inputImage.data(), sizeof(bmp_header));
+    auto header = BmpHeader();
+    std::memcpy(&header, inputImage.data(), sizeof(BmpHeader));
 
     if (!(
             std::memcmp(header.identifier, "BM", 2) == 0 ||
@@ -190,17 +190,17 @@ namespace bmpxx
     return header;
   }
 
-  uint32_t bmp::readDIBHeaderSize(std::vector<uint8_t> inputImage, bmp_header *bmp_header)
+  uint32_t bmp::readDIBHeaderSize(std::vector<uint8_t> inputImage, BmpHeader *bmp_header)
   {
     // First 4 bytes after BMP header are DIB header size
-    const uint32_t dib_header_size = *reinterpret_cast<const uint32_t *>(inputImage.data() + sizeof(bmp_header));
+    const uint32_t dib_header_size = *reinterpret_cast<const uint32_t *>(inputImage.data() + sizeof(BmpHeader));
 
     // Check if the input image is large enough to contain the DIB header.
-    if (inputImage.size() <= sizeof(bmp_header) + dib_header_size)
+    if (inputImage.size() <= sizeof(BmpHeader) + dib_header_size)
       throw std::runtime_error("input image is too small");
 
     // Check if the data offset is valid
-    if (bmp_header->data_offset < sizeof(bmp_header) + dib_header_size)
+    if (bmp_header->data_offset < sizeof(BmpHeader) + dib_header_size)
       throw std::runtime_error("input image data offset is too small");
 
     if (bmp_header->data_offset > inputImage.size())
@@ -209,28 +209,28 @@ namespace bmpxx
     return dib_header_size;
   }
 
-  bmp::dib_decode_header bmp::readDIBHeader(std::vector<uint8_t> inputImage, bmp_header *bmp_header)
+  bmp::DibDecodeHeader bmp::readDIBHeader(std::vector<uint8_t> inputImage, BmpHeader *bmp_header)
   {
     auto dib_header_size = readDIBHeaderSize(inputImage, bmp_header);
 
-    auto dib_header = dib_decode_header(); // Pre populated
+    auto dib_header = DibDecodeHeader(); // Pre populated
 
     switch (dib_header_size)
     {
       // These can all be copied directly, as they all overlap
-    case sizeof(dib_40_header):
-    case sizeof(dib_52_header):
-    case sizeof(dib_56_header):
-    case sizeof(dib_108_header):
-    case sizeof(dib_124_header):
+    case sizeof(Dib40Header):
+    case sizeof(Dib52Header):
+    case sizeof(Dib56Header):
+    case sizeof(Dib108Header):
+    case sizeof(Dib124Header):
     {
-      std::memcpy(&dib_header, inputImage.data() + sizeof(bmp_header), dib_header_size);
+      std::memcpy(&dib_header, inputImage.data() + sizeof(BmpHeader), dib_header_size);
       break;
     }
-    case sizeof(dib_12_header):
+    case sizeof(Dib12Header):
     {
       // DIB 12 is the only outlier, we need to map its values
-      auto dib_header12 = reinterpret_cast<const dib_12_header *>(inputImage.data());
+      auto dib_header12 = reinterpret_cast<const Dib12Header *>(inputImage.data());
       dib_header.header_size = dib_header12->header_size;
       dib_header.width = dib_header12->width;
       dib_header.height = dib_header12->height;
@@ -252,7 +252,7 @@ namespace bmpxx
     fixDIBHeaderDataSize(&dib_header);
 
     if (inputImage.size() < bmp_header->data_offset + dib_header.data_size)
-      throw std::runtime_error("input image too small");
+      throw std::runtime_error("input image is too small");
 
     // Check that the image has a normal size
     if (dib_header.width <= 0 || dib_header.height <= 0)
@@ -265,7 +265,7 @@ namespace bmpxx
     return dib_header;
   }
 
-  void bmp::fixDIBHeaderDataSize(dib_decode_header *dib_header)
+  void bmp::fixDIBHeaderDataSize(DibDecodeHeader *dib_header)
   {
     const uint32_t expected_data_size = dib_header->height * dib_header->meta.padded_row_width;
 
@@ -276,7 +276,7 @@ namespace bmpxx
       throw std::runtime_error("input image size does not match expected image size");
   }
 
-  void bmp::fixDIBHeaderCompression(std::vector<uint8_t> inputImage, dib_decode_header *dib_header)
+  void bmp::fixDIBHeaderCompression(std::vector<uint8_t> inputImage, DibDecodeHeader *dib_header)
   {
     // Ensure it uses a compatible compression
     if (
@@ -285,27 +285,27 @@ namespace bmpxx
         dib_header->compression != BI_ALPHABITFIELDS)
       throw std::runtime_error("input image compression is not supported");
 
-    if (dib_header->header_size <= sizeof(dib_40_header))
+    if (dib_header->header_size <= sizeof(Dib40Header))
     {
       // Merge bitfields into the dib header, since in some cases this is not done
       if (dib_header->compression == BI_BITFIELDS)
       {
-        auto rgb = reinterpret_cast<rgb_masks *>(inputImage.data() + sizeof(bmp_header) + dib_header->header_size);
-        auto target_masks = reinterpret_cast<rgb_masks *>(&dib_header->masks_rgba);
-        std::memcpy(target_masks, rgb, sizeof(rgb_masks));
-        dib_header->header_size += sizeof(rgb_masks);
+        auto rgb_masks = reinterpret_cast<RgbMasks *>(inputImage.data() + sizeof(BmpHeader) + dib_header->header_size);
+        auto target_masks = reinterpret_cast<RgbMasks *>(&dib_header->masks_rgba);
+        std::memcpy(target_masks, rgb_masks, sizeof(RgbMasks));
+        dib_header->header_size += sizeof(RgbMasks);
       }
       else if (dib_header->compression == BI_ALPHABITFIELDS)
       {
-        auto rgba = reinterpret_cast<const rgba_masks *>(inputImage.data() + sizeof(bmp_header) + dib_header->header_size);
-        auto target_masks = reinterpret_cast<rgba_masks *>(&dib_header->masks_rgba);
-        std::memcpy(target_masks, rgba, sizeof(rgba_masks));
-        dib_header->header_size += sizeof(rgba_masks);
+        auto rgba_masks = reinterpret_cast<const RgbaMasks *>(inputImage.data() + sizeof(BmpHeader) + dib_header->header_size);
+        auto target_masks = reinterpret_cast<RgbaMasks *>(&dib_header->masks_rgba);
+        std::memcpy(target_masks, rgba_masks, sizeof(RgbaMasks));
+        dib_header->header_size += sizeof(RgbaMasks);
       }
     }
   }
 
-  void bmp::fixDIBHeaderMasks(dib_decode_header *dib_header)
+  void bmp::fixDIBHeaderMasks(DibDecodeHeader *dib_header)
   {
     if (!(dib_header->masks_rgba.red_mask ||
           dib_header->masks_rgba.green_mask ||

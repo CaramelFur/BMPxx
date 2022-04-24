@@ -36,7 +36,7 @@ int main(int ac, char **av)
     auto result = bmpxx::bmp::decode(inputImage);
 
     std::vector<uint8_t> outputImage = result.first;
-    bmpxx::bmp_desc description = result.second;
+    bmpxx::BmpDesc description = result.second;
 
     // Print description
     std::cout << "Successfully decoded " << input_filename << " to " << output_filename << std::endl;
@@ -56,7 +56,7 @@ int main(int ac, char **av)
       return 1;
     }
 
-    bmpxx::bmp_desc description(std::stoi(av[3]), std::stoi(av[4]), (uint8_t)std::stoi(av[5]));
+    bmpxx::BmpDesc description(std::stoi(av[3]), std::stoi(av[4]), (uint8_t)std::stoi(av[5]));
 
     std::vector<uint8_t> outputImage = bmpxx::bmp::encode(inputImage, description);
 
