@@ -34,9 +34,6 @@ int main(int ac, char **av)
   std::vector<uint8_t> outputImage = result.first;
   bmpxx::bmp_desc description = result.second;
 
-  // Print first 4 bytes of outputImage
-  printf("%02x %02x %02x %02x\n", outputImage[0], outputImage[1], outputImage[2], outputImage[3]);
-
   auto result2 = bmpxx::encode(outputImage, description);
 
   // // Print outputImage bytes

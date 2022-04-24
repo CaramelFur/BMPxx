@@ -43,7 +43,7 @@ namespace bmpxx
   std::pair<std::vector<uint8_t>, bmp_desc> decodePalette(
       std::vector<uint8_t> inputImage,
       internal::bmp_header *bmp_header,
-      internal::dib_header *dib_header)
+      internal::dib_decode_header *dib_header)
   {
     if (dib_header->colors_used == 0 || dib_header->colors_used > 256)
       throw std::runtime_error("input image colors used is invalid");
@@ -89,7 +89,7 @@ namespace bmpxx
   std::pair<std::vector<uint8_t>, bmp_desc> decodeNormal(
       std::vector<uint8_t> inputImage,
       internal::bmp_header *bmp_header,
-      internal::dib_header *dib_header)
+      internal::dib_decode_header *dib_header)
   {
     uint32_t decoded_data_pos = 0;
     auto description = bmp_desc(
@@ -129,7 +129,7 @@ namespace bmpxx
     return std::make_pair(decoded_data, description);
   }
 
-  internal::decoded_rgba_masks decodeMasks(internal::dib_header *dib_header)
+  internal::decoded_rgba_masks decodeMasks(internal::dib_decode_header *dib_header)
   {
     auto masks = internal::decoded_rgba_masks();
 
@@ -209,11 +209,11 @@ namespace bmpxx
     return dib_header_size;
   }
 
-  internal::dib_header readDIBHeader(std::vector<uint8_t> inputImage, internal::bmp_header *bmp_header)
+  internal::dib_decode_header readDIBHeader(std::vector<uint8_t> inputImage, internal::bmp_header *bmp_header)
   {
     auto dib_header_size = readDIBHeaderSize(inputImage, bmp_header);
 
-    auto dib_header = internal::dib_header(); // Pre populated
+    auto dib_header = internal::dib_decode_header(); // Pre populated
 
     switch (dib_header_size)
     {
@@ -265,7 +265,7 @@ namespace bmpxx
     return dib_header;
   }
 
-  void populateDIBHeaderMeta(internal::dib_header *dib_header)
+  void populateDIBHeaderMeta(internal::dib_decode_header *dib_header)
   {
     // Padding rows
     const uint32_t row_width_bits = dib_header->width * dib_header->bits_per_pixel;
@@ -278,7 +278,7 @@ namespace bmpxx
     dib_header->meta.has_alpha_channel = dib_header->masks_rgba.alpha_mask != 0;
   }
 
-  void fixDIBHeaderDataSize(internal::dib_header *dib_header)
+  void fixDIBHeaderDataSize(internal::dib_decode_header *dib_header)
   {
     const uint32_t expected_data_size = dib_header->height * dib_header->meta.padded_row_width;
 
@@ -289,7 +289,7 @@ namespace bmpxx
       throw std::runtime_error("input image size does not match expected image size");
   }
 
-  void fixDIBHeaderCompression(std::vector<uint8_t> inputImage, internal::dib_header *dib_header)
+  void fixDIBHeaderCompression(std::vector<uint8_t> inputImage, internal::dib_decode_header *dib_header)
   {
     // Ensure it uses a compatible compression
     if (
@@ -318,7 +318,7 @@ namespace bmpxx
     }
   }
 
-  void fixDIBHeaderMasks(internal::dib_header *dib_header)
+  void fixDIBHeaderMasks(internal::dib_decode_header *dib_header)
   {
     if (!(dib_header->masks_rgba.red_mask ||
           dib_header->masks_rgba.green_mask ||
