@@ -3,7 +3,7 @@
 
 cmake_minimum_required (VERSION 3.5.1)
 
-add_definitions("-Wall" "-Wextra" "-Wconversion" "-Wpedantic" "-O3" "-march=native" "-mtune=native" "-std=c++20")
+add_definitions("-Wall" "-Wextra" "-Wconversion" "-Wpedantic" "-O3" "-march=native" "-mtune=native" "-std=c++2a")
 
 # Main lib
 

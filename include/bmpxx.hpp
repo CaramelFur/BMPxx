@@ -13,6 +13,7 @@ namespace bmpxx
 
     BmpDesc(uint32_t width, uint32_t height, uint8_t channels)
         : width(width), height(height), channels(channels) {}
+    BmpDesc() : width(0), height(0), channels(0) {}
   };
 
   class bmp
