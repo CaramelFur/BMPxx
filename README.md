@@ -67,3 +67,7 @@ This program can convert between bmp and the raw rgb/rgba pixel arrays.
 ## Helping
 
 This library also does not support all the bmp features, so if you are missing something, feel free to submit a pull request.
+
+## License
+
+This code is licensed under the GNU General Public License v3.0, so any changes or additions to this code will have to be made public under the same license.
