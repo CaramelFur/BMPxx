@@ -6,8 +6,6 @@
 
 namespace bmpxx
 {
-  typedef uint8_t byte;
-
   namespace internal
   {
     enum color_space
@@ -52,6 +50,11 @@ namespace bmpxx
       uint8_t green_shift = 0;
       uint8_t blue_shift = 0;
       uint8_t alpha_shift = 0;
+
+      float red_scale = 0.0f;
+      float green_scale = 0.0f;
+      float blue_scale = 0.0f;
+      float alpha_scale = 0.0f;
     };
 
     struct __attribute__((packed)) ciexyz
@@ -141,6 +144,24 @@ namespace bmpxx
       uint32_t profile_size = 0;
       uint32_t reserved = 0;
     };
+
+    struct __attribute__((packed)) dib_header : dib_124_header
+    {
+      struct dib_header_meta
+      {
+        uint32_t padded_row_width = 0;
+        uint8_t has_alpha_channel = 0;
+      } meta = dib_header_meta();
+    };
+
+    struct RGBAColor
+    {
+      uint8_t red;
+      uint8_t green;
+      uint8_t blue;
+      uint8_t alpha;
+    };
+
   }
 
   struct bmp_desc
@@ -148,25 +169,29 @@ namespace bmpxx
     uint32_t width;
     uint32_t height;
     uint8_t channels;
+
+    bmp_desc(uint32_t width, uint32_t height, uint8_t channels)
+        : width(width), height(height), channels(channels)
+    {
+    }
   };
 
-  std::pair<std::vector<byte>, bmp_desc> decode(std::vector<byte> inputImage);
-  std::vector<uint32_t> decodePalette(
-      std::vector<byte> inputImage,
-      internal::bmp_header *header,
-      internal::dib_124_header *dib_header);
-  std::vector<uint32_t> decode16Bit(
-      std::vector<byte> inputImage,
-      internal::bmp_header *header,
-      internal::dib_124_header *dib_header);
-  std::vector<uint32_t> decode24Bit(
-      std::vector<byte> inputImage,
-      internal::bmp_header *header,
-      internal::dib_124_header *dib_header);
-  std::vector<uint32_t> decode32Bit(
-      std::vector<byte> inputImage,
-      internal::bmp_header *header,
-      internal::dib_124_header *dib_header);
-  internal::decoded_rgba_masks decodeMasks(internal::dib_124_header *dib_header);
-  uint32_t calculatePaddedRowWidthAndDatasize(internal::dib_124_header *dib_header);
+  std::pair<std::vector<uint8_t>, bmp_desc> decode(std::vector<uint8_t> inputImage);
+  std::pair<std::vector<uint8_t>, bmp_desc> decodePalette(
+      std::vector<uint8_t> inputImage,
+      internal::bmp_header *bmp_header,
+      internal::dib_header *dib_header);
+  std::pair<std::vector<uint8_t>, bmp_desc> decodeNormal(
+      std::vector<uint8_t> inputImage,
+      internal::bmp_header *bmp_header,
+      internal::dib_header *dib_header);
+
+  internal::decoded_rgba_masks decodeMasks(internal::dib_header *dib_header);
+  internal::bmp_header readBMPHeader(std::vector<uint8_t> inputImage);
+  uint32_t readDIBHeaderSize(std::vector<uint8_t> inputImage, internal::bmp_header *bmp_header);
+  internal::dib_header readDIBHeader(std::vector<uint8_t> inputImage, internal::bmp_header *bmp_header);
+  void populateDIBHeaderMeta(internal::dib_header *dib_header);
+  void fixDIBHeaderDataSize(internal::dib_header *dib_header);
+  void fixDIBHeaderCompression(std::vector<uint8_t> inputImage, internal::dib_header *dib_header);
+  void fixDIBHeaderMasks(internal::dib_header *dib_header);
 }
