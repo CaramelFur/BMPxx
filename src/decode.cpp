@@ -230,7 +230,7 @@ namespace bmpxx
     case sizeof(Dib12Header):
     {
       // DIB 12 is the only outlier, we need to map its values
-      auto dib_header12 = reinterpret_cast<const Dib12Header *>(inputImage.data());
+      auto dib_header12 = reinterpret_cast<const Dib12Header *>(inputImage.data() + sizeof(BmpHeader));
       dib_header.header_size = dib_header12->header_size;
       dib_header.width = dib_header12->width;
       dib_header.height = dib_header12->height;
