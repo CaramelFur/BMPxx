@@ -87,7 +87,9 @@ namespace bmpxx
     struct DibHeaderMeta
     {
       uint32_t padded_row_width = 0;
+      uint32_t expected_data_size = 0;
       uint8_t has_alpha_channel = 0;
+      uint8_t has_icon_mask = 0;
     };
 
     // ============================================================
@@ -203,6 +205,9 @@ namespace bmpxx
 
     // Decode
 
+    static std::pair<std::vector<uint8_t>, BmpDesc> decode_headerless(
+        std::vector<uint8_t> headerless_image,
+        BmpHeader *bmp_header);
     static std::pair<std::vector<uint8_t>, BmpDesc> decodePalette(
         std::vector<uint8_t> inputImage,
         BmpHeader *bmp_header,
@@ -213,7 +218,7 @@ namespace bmpxx
         DibDecodeHeader *dib_header);
     static DecodedRgbaMasks decodeMasks(DibDecodeHeader *dib_header);
 
-    static BmpHeader readBMPHeader(std::vector<uint8_t> inputImage);
+    static std::pair<std::vector<uint8_t>, bmp::BmpHeader> readBMPHeader(std::vector<uint8_t> inputImage);
     static uint32_t readDIBHeaderSize(std::vector<uint8_t> inputImage, BmpHeader *bmp_header);
     static DibDecodeHeader readDIBHeader(std::vector<uint8_t> inputImage, BmpHeader *bmp_header);
 
@@ -231,6 +236,7 @@ namespace bmpxx
 
   public:
     static std::pair<std::vector<uint8_t>, BmpDesc> decode(std::vector<uint8_t> inputImage);
+    static std::pair<std::vector<uint8_t>, BmpDesc> decode_icon(std::vector<uint8_t> inputImage);
     static std::vector<uint8_t> encode(std::vector<uint8_t> input, BmpDesc desc);
   };
 

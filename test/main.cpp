@@ -48,6 +48,23 @@ int main(int ac, char **av)
     outfile.write(reinterpret_cast<char *>(outputImage.data()), outputImage.size());
     outfile.close();
   }
+  else if (input_filename.size() > 4 && input_filename.substr(input_filename.size() - 4) == ".ico")
+  {
+    auto result = bmpxx::bmp::decode_icon(inputImage);
+
+    std::vector<uint8_t> outputImage = result.first;
+    bmpxx::BmpDesc description = result.second;
+
+    // Print description
+    std::cout << "Successfully decoded " << input_filename << " to " << output_filename << std::endl;
+    std::cout << "Width: " << description.width << std::endl;
+    std::cout << "Height: " << description.height << std::endl;
+    std::cout << "Channels: " << (int)description.channels << std::endl;
+
+    std::ofstream outfile(output_filename, std::ios::binary);
+    outfile.write(reinterpret_cast<char *>(outputImage.data()), outputImage.size());
+    outfile.close();
+  }
   else if (output_filename.size() > 4 && output_filename.substr(output_filename.size() - 4) == ".bmp")
   {
     if (ac < 6)
