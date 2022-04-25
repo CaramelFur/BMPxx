@@ -187,13 +187,13 @@ namespace bmpxx
       DibHeaderMeta meta = DibHeaderMeta();
     };
 
-    struct __attribute__((packed)) DibEncodeHeader : Dib56Header
+    struct __attribute__((packed)) DibEncodeHeader : Dib108Header
     {
       DibHeaderMeta meta = DibHeaderMeta();
 
       DibEncodeHeader()
       {
-        header_size = 56;
+        header_size = 108;
       }
     };
 
